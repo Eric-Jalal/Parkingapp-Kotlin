@@ -11,7 +11,6 @@ class MapViewModel {
 
     private static double latitude;
     private static double longitude;
-    private static Location location;
 
     static void setLatLng(Context context){
         JsonParser jsonParser = new JsonParser();
