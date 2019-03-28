@@ -19,6 +19,9 @@ class MapViewModel {
     private double latitude;
     private double longitude;
     private JsonParser jsonParser = new JsonParser();
+    private LatLng parkingLocation;
+    private String parkingName;
+    private String parkingParice;
 
     public MapViewModel(Context context) {
         this.context = context;
@@ -44,6 +47,10 @@ class MapViewModel {
 
     double getLongitude() {
         return longitude;
+    }
+
+    public List<Zones> getZoneData() {
+        return loadLocationGson(context).getLocationData().getZones();
     }
 
     public ArrayList<LatLng> getZonesPolygon() {

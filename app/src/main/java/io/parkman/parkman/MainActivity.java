@@ -4,26 +4,36 @@ import android.graphics.Color;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.JointType;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.maps.model.RoundCap;
 
 import java.util.Arrays;
 import java.util.List;
 
 import entities.Bounds;
+import helper.StringToArray;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     private MapViewModel mapViewModel;
+    private ImageView pinImageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,18 +43,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         mapViewModel = new MapViewModel(getApplicationContext());
+        pinImageView = findViewById(R.id.imageView);
     }
 
-    /**
-     * Creates a List of LatLngs that form a rectangle with the given dimensions.
-     */
-    private List<LatLng> createRectangle(LatLng center, double halfWidth, double halfHeight) {
-        return Arrays.asList(new LatLng(center.latitude - halfHeight, center.longitude - halfWidth),
-                new LatLng(center.latitude - halfHeight, center.longitude + halfWidth),
-                new LatLng(center.latitude + halfHeight, center.longitude + halfWidth),
-                new LatLng(center.latitude + halfHeight, center.longitude - halfWidth),
-                new LatLng(center.latitude - halfHeight, center.longitude - halfWidth));
-    }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -55,12 +56,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap = googleMap;
         LatLng currentLocation = new LatLng(mapViewModel.getLatitude(), mapViewModel.getLongitude());
 
-        PolygonOptions polygonOptions = new PolygonOptions();
-        polygonOptions.addAll(mapViewModel.getZonesPolygon());
-        polygonOptions.clickable(true);
-        polygonOptions.strokeColor(ContextCompat.getColor(this,android.R.color.holo_orange_dark));
-        polygonOptions.fillColor(ContextCompat.getColor(this,android.R.color.holo_orange_light));
-        googleMap.addPolygon(polygonOptions);
+        // Polyline
+        mMap.addPolygon(new PolygonOptions()
+                .addAll(mapViewModel.getZonesPolygon())
+                .strokeColor(Color.RED)
+                .fillColor(Color.BLUE));
 
         // Set bounds
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
@@ -69,10 +69,48 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         builder.include(northEast);
         builder.include(southWest);
         LatLngBounds bounds = builder.build();
-        int width = getResources().getDisplayMetrics().widthPixels;
-        int height = getResources().getDisplayMetrics().heightPixels;
-        int padding = (int) (width * 0.12); // offset from edges of the map 12% of screen
+        mMap.setLatLngBoundsForCameraTarget(bounds);
+        mMap.setMinZoomPreference(15f);
 
-        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding));
+        // Marker
+        for (int i = 0; i < mapViewModel.getZoneData().size(); i++){
+            List<String> polygonLatLng;
+            polygonLatLng = StringToArray.convertStringToArraySpaceSeparated(mapViewModel.getZoneData().get(i).getPoint());
+            LatLng point = new LatLng(Double.parseDouble(polygonLatLng.get(0)), Double.parseDouble(polygonLatLng.get(1)));
+            mMap.addMarker(new MarkerOptions()
+                    .position(point)
+                    .title(mapViewModel.getZoneData().get(i).getName())
+                    .draggable(true)
+                    .snippet(mapViewModel.getZoneData().get(i).getServicePrice() + " Euro")
+                    .icon(BitmapDescriptorFactory
+                            .defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+        }
+
+        mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
+            @Override
+            public void onCameraMove() {
+                pinImageView.setVisibility(View.INVISIBLE);
+            }
+        });
+        mMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
+            @Override
+            public void onCameraIdle() {
+                pinImageView.setVisibility(View.VISIBLE);
+            }
+        });
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLocation));
     }
+
+
+    public boolean onMarkerClick(final Marker marker) {
+        if (marker.equals(mMap)) {
+            double lat = mMap.getMyLocation().getLatitude();
+            Toast.makeText(MainActivity.this,
+                    "Current location " + lat,
+                    Toast.LENGTH_SHORT).show();
+        }
+        return true;
+    }
+
 }
