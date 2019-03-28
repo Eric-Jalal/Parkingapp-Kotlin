@@ -1,8 +1,6 @@
 package io.parkman.parkman;
 
 import android.graphics.Color;
-import android.location.LocationListener;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -16,17 +14,12 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.JointType;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
-import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.android.gms.maps.model.RoundCap;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -43,6 +36,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private TextView textViewName,textViewMaxDuration,textViewEmail;
     private String markerTitle;
     private Button parkButton;
+    private LatLng currentLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +46,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         mapViewModel = new MapViewModel(getApplicationContext());
+        mapViewModel.setLatLng();
+        findViews();
+    }
+
+    private void findViews() {
         pinImageView = findViewById(R.id.imageView);
         textViewName = findViewById(R.id.textBox_name);
         textViewEmail = findViewById(R.id.textBox_email);
@@ -61,76 +60,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-
-        mapViewModel.setLatLng();
-        Bounds boundsEntity = mapViewModel.getBounds();
-
         mMap = googleMap;
-        LatLng currentLocation = new LatLng(mapViewModel.getLatitude(), mapViewModel.getLongitude());
-
-
-        // Set bounds
-        LatLngBounds.Builder builder = new LatLngBounds.Builder();
-        LatLng northEast = new LatLng(boundsEntity.getNorth(), boundsEntity.getEast());
-        LatLng southWest = new LatLng(boundsEntity.getSouth(),boundsEntity.getWest());
-        builder.include(northEast);
-        builder.include(southWest);
-        LatLngBounds bounds = builder.build();
-        mMap.setLatLngBoundsForCameraTarget(bounds);
+        getCurrentLocation();
+        setMapBounds();
+        drawPolygons();
+        setZoneMarkers();
+        setMapPinVisibilityStates();
+        parkButtonOnClickListener();
+        markerOnClickListener();
         mMap.setMinZoomPreference(15f);
-
-        // Polyline
-        // TODO: This section must be modified, the bug is all the vertices are
-        // TODO: connected to each other, so then .fillColor(Color.BLUE) is not working
-        // TODO: Many different solutions has been tested, need to ask
-        for (int i = 0; i < mapViewModel.getZonesPolygon().size(); i++) {
-            mMap.addPolygon(new PolygonOptions()
-                    .addAll(mapViewModel.getZonesPolygon().get(i))
-                    .strokeColor(Color.BLUE)
-                    .fillColor(Color.BLUE));
-        }
-
-        // Marker
-        for (int i = 0; i < mapViewModel.getZoneData().size(); i++){
-            List<String> polygonLatLng;
-            polygonLatLng = StringToArray.convertStringToArraySpaceSeparated(mapViewModel.getZoneData().get(i).getPoint());
-            zoneMap.put(mapViewModel.getZoneData().get(i).getName().trim(), mapViewModel.getZoneData().get(i));
-            LatLng point = new LatLng(Double.parseDouble(polygonLatLng.get(0)), Double.parseDouble(polygonLatLng.get(1)));
-            mMap.addMarker(new MarkerOptions()
-                    .position(point)
-                    .title(mapViewModel.getZoneData().get(i).getName())
-                    .draggable(true)
-                    .snippet(mapViewModel.getZoneData().get(i).getServicePrice() + " Euro")
-                    .icon(BitmapDescriptorFactory
-                            .defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-        }
-
-        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-            @Override
-            public boolean onMarkerClick(Marker marker) {
-                markerTitle = marker.getTitle();
-                if (zoneMap.get(marker.getTitle()) != null){
-                    textViewName.setText(zoneMap.get(marker.getTitle()).getProviderName());
-                    textViewEmail.setText(zoneMap.get(marker.getTitle()).getContactEmail());
-                    textViewMaxDuration.setText(String.format("%s Min", String.valueOf(zoneMap.get(marker.getTitle()).getMaxDuration())));
-                }
-                return false;
-            }
-        });
-
-        parkButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(!markerTitle.isEmpty()){
-                    Toast.makeText(getApplicationContext(), markerTitle, Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(getApplicationContext(), "First select a marker", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-
         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLocation));
+    }
 
+    private void setMapPinVisibilityStates() {
         mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
             @Override
             public void onCameraMove() {
@@ -143,8 +86,86 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 pinImageView.setVisibility(View.VISIBLE);
             }
         });
+    }
 
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLocation));
+    private void parkButtonOnClickListener() {
+        parkButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(markerTitle != null){
+                    Toast.makeText(getApplicationContext(),
+                            getString(R.string.you_parked_here) + markerTitle,
+                            Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getApplicationContext(),
+                            getString(R.string.first_select_a_marker),
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    private void markerOnClickListener() {
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                markerTitle = marker.getTitle();
+                if (zoneMap.get(marker.getTitle()) != null){
+                    textViewName.setText(zoneMap.get(marker.getTitle()).getProviderName());
+                    textViewEmail.setText(zoneMap.get(marker.getTitle()).getContactEmail());
+                    textViewMaxDuration.setText(String.format("%s Min",
+                            String.valueOf(zoneMap.get(marker.getTitle()).getMaxDuration())));
+                }
+                return false;
+            }
+        });
+    }
+
+    private void setZoneMarkers() {
+        // Marker
+        for (int i = 0; i < mapViewModel.getZoneData().size(); i++){
+            List<String> polygonLatLng;
+            polygonLatLng = StringToArray.convertStringToArraySpaceSeparated(mapViewModel.getZoneData().get(i).getPoint());
+            zoneMap.put(mapViewModel.getZoneData().get(i).getName().trim(), mapViewModel.getZoneData().get(i));
+            LatLng point = new LatLng(Double.parseDouble(polygonLatLng.get(0)), Double.parseDouble(polygonLatLng.get(1)));
+            mMap.addMarker(new MarkerOptions()
+                    .position(point)
+                    .title(mapViewModel.getZoneData().get(i).getName())
+                    .draggable(true)
+                    .snippet(mapViewModel.getZoneData().get(i).getServicePrice() + getString(R.string.Euro))
+                    .icon(BitmapDescriptorFactory
+                            .defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+        }
+    }
+
+    private void drawPolygons() {
+        // Polyline
+        // TODO: This section must be modified, the bug is all the vertices are
+        // TODO: connected to each other, so then .fillColor(Color.BLUE) is not working
+        // TODO: Many different solutions has been tested, need to ask
+        // TODO: I used Markers instead of changing inside of polygons
+        for (int i = 0; i < mapViewModel.getZonesPolygon().size(); i++) {
+            mMap.addPolygon(new PolygonOptions()
+                    .addAll(mapViewModel.getZonesPolygon().get(i))
+                    .strokeColor(Color.BLUE)
+                    .fillColor(Color.BLUE));
+        }
+    }
+
+    private void getCurrentLocation() {
+        currentLocation = new LatLng(mapViewModel.getLatitude(), mapViewModel.getLongitude());
+    }
+
+    private void setMapBounds() {
+        // Set bounds
+        Bounds boundsEntity = mapViewModel.getBounds();
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+        LatLng northEast = new LatLng(boundsEntity.getNorth(), boundsEntity.getEast());
+        LatLng southWest = new LatLng(boundsEntity.getSouth(),boundsEntity.getWest());
+        builder.include(northEast);
+        builder.include(southWest);
+        LatLngBounds bounds = builder.build();
+        mMap.setLatLngBoundsForCameraTarget(bounds);
     }
 
 }

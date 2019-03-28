@@ -19,11 +19,8 @@ class MapViewModel {
     private double latitude;
     private double longitude;
     private JsonParser jsonParser = new JsonParser();
-    private LatLng parkingLocation;
-    private String parkingName;
-    private String parkingParice;
 
-    public MapViewModel(Context context) {
+    MapViewModel(Context context) {
         this.context = context;
     }
 
@@ -37,23 +34,15 @@ class MapViewModel {
         longitude = locLatLng.get(1);
     }
 
-    public Bounds getBounds(){
+    Bounds getBounds(){
         return loadLocationGson(context).getLocationData().getBounds();
     }
 
-    double getLatitude() {
-        return latitude;
-    }
-
-    double getLongitude() {
-        return longitude;
-    }
-
-    public List<Zones> getZoneData() {
+    List<Zones> getZoneData() {
         return loadLocationGson(context).getLocationData().getZones();
     }
 
-    public ArrayList<ArrayList<LatLng>> getZonesPolygon() {
+    ArrayList<ArrayList<LatLng>> getZonesPolygon() {
         List<Zones> zonesList = loadLocationGson(context).getLocationData().getZones();
         ArrayList<ArrayList<LatLng>> locLatLng = new ArrayList<>();
         ArrayList<LatLng> pointSequences = new ArrayList<>();
@@ -76,6 +65,14 @@ class MapViewModel {
             locLatLng.add(Double.parseDouble(aListLatLng));
         }
         return locLatLng;
+    }
+
+    double getLatitude() {
+        return latitude;
+    }
+
+    double getLongitude() {
+        return longitude;
     }
 
 }

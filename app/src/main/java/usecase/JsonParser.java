@@ -15,19 +15,17 @@ import java.lang.reflect.Type;
 import entities.Location;
 
 public class JsonParser {
-
     public Location loadJSONFromAsset(Context context) {
         AssetManager assetManager = context.getAssets();
-        InputStream ims = null;
+        InputStream inputStream = null;
         try {
-            ims = assetManager.open("data.json");
+            inputStream = assetManager.open("data.json");
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Reader reader = new InputStreamReader(ims);
+        Reader reader = new InputStreamReader(inputStream);
         final Gson gson = new Gson();
         Type location = new TypeToken<Location>(){}.getType();
-
         return gson.fromJson(reader, location);
     }
 }

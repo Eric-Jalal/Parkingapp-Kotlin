@@ -2,4 +2,7 @@
     <string name="app_name">Parkman</string>
     <string name="title_activity_maps">Map</string>
     <string name="button">Park here</string>
+    <string name="you_parked_here">You parked here</string>
+    <string name="first_select_a_marker">First select a marker</string>
+    <string name="Euro"> Euro</string>
 </resources>
