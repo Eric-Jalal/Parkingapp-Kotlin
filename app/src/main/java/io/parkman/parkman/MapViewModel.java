@@ -53,17 +53,17 @@ class MapViewModel {
         return loadLocationGson(context).getLocationData().getZones();
     }
 
-    public ArrayList<LatLng> getZonesPolygon() {
+    public ArrayList<ArrayList<LatLng>> getZonesPolygon() {
         List<Zones> zonesList = loadLocationGson(context).getLocationData().getZones();
-        ArrayList<LatLng> locLatLng = new ArrayList<LatLng>();
+        ArrayList<ArrayList<LatLng>> locLatLng = new ArrayList<>();
+        ArrayList<LatLng> pointSequences = new ArrayList<>();
         for (Zones zones : zonesList){
             List<String> listLatLngCommaSeparated = StringToArray.convertStringToArrayCommaSeparated(zones.getPolygon());
             for (int i = 0; i < listLatLngCommaSeparated.size(); i++) {
-                List<String> polygonLatLng;
-                polygonLatLng = StringToArray.convertStringToArraySpaceSeparated(listLatLngCommaSeparated.get(i));
-                LatLng point = new LatLng(Double.parseDouble(polygonLatLng.get(0)), Double.parseDouble(polygonLatLng.get(1)));
-                locLatLng.add(point);
+                List<String> polygonLatLng = StringToArray.convertStringToArraySpaceSeparated(listLatLngCommaSeparated.get(i));
+                pointSequences.add(new LatLng(Double.parseDouble(polygonLatLng.get(0)), Double.parseDouble(polygonLatLng.get(1))));
             }
+            locLatLng.add(pointSequences);
         }
         return locLatLng;
     }

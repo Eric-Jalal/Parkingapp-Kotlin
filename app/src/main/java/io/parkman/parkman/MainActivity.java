@@ -41,6 +41,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private ImageView pinImageView;
     private HashMap<String, Zones> zoneMap = new HashMap<>();
     private TextView textViewName,textViewMaxDuration,textViewEmail;
+    private String markerTitle;
     private Button parkButton;
 
     @Override
@@ -55,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         textViewName = findViewById(R.id.textBox_name);
         textViewEmail = findViewById(R.id.textBox_email);
         textViewMaxDuration = findViewById(R.id.textBox_maxDuration);
+        parkButton = findViewById(R.id.button_park);
     }
 
     @Override
@@ -66,11 +68,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap = googleMap;
         LatLng currentLocation = new LatLng(mapViewModel.getLatitude(), mapViewModel.getLongitude());
 
-        // Polyline
-        mMap.addPolygon(new PolygonOptions()
-                .addAll(mapViewModel.getZonesPolygon())
-                .strokeColor(Color.RED)
-                .fillColor(Color.BLUE));
 
         // Set bounds
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
@@ -81,6 +78,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         LatLngBounds bounds = builder.build();
         mMap.setLatLngBoundsForCameraTarget(bounds);
         mMap.setMinZoomPreference(15f);
+
+        // Polyline
+        // TODO: This section must be modified, the bug is all the vertices are
+        // TODO: connected to each other, so then .fillColor(Color.BLUE) is not working
+        // TODO: Many different solutions has been tested, need to ask
+        for (int i = 0; i < mapViewModel.getZonesPolygon().size(); i++) {
+            mMap.addPolygon(new PolygonOptions()
+                    .addAll(mapViewModel.getZonesPolygon().get(i))
+                    .strokeColor(Color.BLUE)
+                    .fillColor(Color.BLUE));
+        }
 
         // Marker
         for (int i = 0; i < mapViewModel.getZoneData().size(); i++){
@@ -100,6 +108,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
+                markerTitle = marker.getTitle();
                 if (zoneMap.get(marker.getTitle()) != null){
                     textViewName.setText(zoneMap.get(marker.getTitle()).getProviderName());
                     textViewEmail.setText(zoneMap.get(marker.getTitle()).getContactEmail());
@@ -109,6 +118,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
+        parkButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!markerTitle.isEmpty()){
+                    Toast.makeText(getApplicationContext(), markerTitle, Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), "First select a marker", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
 
         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
