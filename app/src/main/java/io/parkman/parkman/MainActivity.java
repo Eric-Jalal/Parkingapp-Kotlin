@@ -1,11 +1,14 @@
 package io.parkman.parkman;
 
 import android.graphics.Color;
+import android.location.LocationListener;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -24,9 +27,11 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.RoundCap;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import entities.Bounds;
+import entities.Zones;
 import helper.StringToArray;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -34,6 +39,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private GoogleMap mMap;
     private MapViewModel mapViewModel;
     private ImageView pinImageView;
+    private HashMap<String, Zones> zoneMap = new HashMap<>();
+    private TextView textViewName,textViewMaxDuration,textViewEmail;
+    private Button parkButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,8 +52,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapFragment.getMapAsync(this);
         mapViewModel = new MapViewModel(getApplicationContext());
         pinImageView = findViewById(R.id.imageView);
+        textViewName = findViewById(R.id.textBox_name);
+        textViewEmail = findViewById(R.id.textBox_email);
+        textViewMaxDuration = findViewById(R.id.textBox_maxDuration);
     }
-
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -76,6 +86,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         for (int i = 0; i < mapViewModel.getZoneData().size(); i++){
             List<String> polygonLatLng;
             polygonLatLng = StringToArray.convertStringToArraySpaceSeparated(mapViewModel.getZoneData().get(i).getPoint());
+            zoneMap.put(mapViewModel.getZoneData().get(i).getName().trim(), mapViewModel.getZoneData().get(i));
             LatLng point = new LatLng(Double.parseDouble(polygonLatLng.get(0)), Double.parseDouble(polygonLatLng.get(1)));
             mMap.addMarker(new MarkerOptions()
                     .position(point)
@@ -85,6 +96,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     .icon(BitmapDescriptorFactory
                             .defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
         }
+
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                if (zoneMap.get(marker.getTitle()) != null){
+                    textViewName.setText(zoneMap.get(marker.getTitle()).getProviderName());
+                    textViewEmail.setText(zoneMap.get(marker.getTitle()).getContactEmail());
+                    textViewMaxDuration.setText(String.format("%s Min", String.valueOf(zoneMap.get(marker.getTitle()).getMaxDuration())));
+                }
+                return false;
+            }
+        });
+
+
+        mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
         mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
             @Override
@@ -100,17 +126,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
 
         mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLocation));
-    }
-
-
-    public boolean onMarkerClick(final Marker marker) {
-        if (marker.equals(mMap)) {
-            double lat = mMap.getMyLocation().getLatitude();
-            Toast.makeText(MainActivity.this,
-                    "Current location " + lat,
-                    Toast.LENGTH_SHORT).show();
-        }
-        return true;
     }
 
 }

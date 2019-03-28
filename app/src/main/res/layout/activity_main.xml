@@ -23,49 +23,28 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:gravity="bottom"
-        android:layout_marginBottom="20dp"
-        android:layout_alignParentBottom="true"
-        android:orientation="vertical">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:orientation="horizontal">
-            <TextView
-                android:id="@+id/textBox_name"
-                android:text="TextBox sticker"
-                android:layout_margin="5dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
         android:layout_height="50dp"
         android:gravity="bottom"
+        android:background="#D5D5D5"
+        android:layout_marginBottom="20dp"
         android:layout_alignParentBottom="true"
         android:orientation="horizontal">
         <TextView
-            android:id="@+id/textBox_sticker"
-            android:text="TextBox sticker"
+            android:id="@+id/textBox_name"
             android:layout_margin="5dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
         <TextView
             android:id="@+id/textBox_email"
-            android:text="TextBox sticker"
             android:layout_margin="5dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
         <TextView
-            android:id="@+id/textBox_providerName"
-            android:text="TextBox maxduration"
+            android:id="@+id/textBox_maxDuration"
             android:layout_margin="5dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
-    </LinearLayout>
     </LinearLayout>
 
     <ImageView
