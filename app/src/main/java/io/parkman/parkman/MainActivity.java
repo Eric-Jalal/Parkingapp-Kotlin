@@ -143,7 +143,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         // TODO: This section must be modified, the bug is all the vertices are
         // TODO: connected to each other, so then .fillColor(Color.BLUE) is not working
         // TODO: Many different solutions has been tested, need to ask
-        // TODO: I used Markers instead of changing inside of polygons
+        // TODO: I used Markers instead of changing inside of polygongit s
         for (int i = 0; i < mapViewModel.getZonesPolygon().size(); i++) {
             mMap.addPolygon(new PolygonOptions()
                     .addAll(mapViewModel.getZonesPolygon().get(i))
