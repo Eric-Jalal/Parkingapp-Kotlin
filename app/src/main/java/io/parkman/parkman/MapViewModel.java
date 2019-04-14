@@ -7,6 +7,8 @@ import com.google.android.gms.maps.model.LatLng;
 import java.util.ArrayList;
 import java.util.List;
 
+import Data.Data;
+import Data.Endpoint;
 import entities.LocationData;
 import entities.Vehicles;
 import helper.StringToArray;
@@ -20,6 +22,8 @@ class MapViewModel {
     private JsonParser jsonParser = new JsonParser();
 
     MapViewModel(Context context) {
+        Endpoint service = Data.getRetrofitInstance().create(Endpoint.class);
+
         this.context = context;
     }
 
@@ -46,9 +50,9 @@ class MapViewModel {
         ArrayList<ArrayList<LatLng>> locLatLng = new ArrayList<>();
         ArrayList<LatLng> pointSequences = new ArrayList<>();
         for (Zones zones : zonesList){
-            List<String> listLatLngCommaSeparated = StringToArray.convertStringToArrayCommaSeparated(zones.getPolygon());
+            List<String> listLatLngCommaSeparated = StringToArray.INSTANCE.convertStringToArrayCommaSeparated(zones.getPolygon());
             for (int i = 0; i < listLatLngCommaSeparated.size(); i++) {
-                List<String> polygonLatLng = StringToArray.convertStringToArraySpaceSeparated(listLatLngCommaSeparated.get(i));
+                List<String> polygonLatLng = StringToArray.INSTANCE.convertStringToArraySpaceSeparated(listLatLngCommaSeparated.get(i));
                 pointSequences.add(new LatLng(Double.parseDouble(polygonLatLng.get(0)), Double.parseDouble(polygonLatLng.get(1))));
             }
             locLatLng.add(pointSequences);
@@ -58,7 +62,7 @@ class MapViewModel {
 
     private ArrayList<Double> extractLocationLatLng(String string) {
         ArrayList<Double> locLatLng = new ArrayList<>();
-        List<String> listLatLng = StringToArray.convertStringToArrayCommaSeparated(string);
+        List<String> listLatLng = StringToArray.INSTANCE.convertStringToArrayCommaSeparated(string);
         // while loop
         for (String aListLatLng : listLatLng) {
             locLatLng.add(Double.parseDouble(aListLatLng));

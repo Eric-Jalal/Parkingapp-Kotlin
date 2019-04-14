@@ -14,6 +14,7 @@ import java.lang.reflect.Type
 
 import entities.LocationData
 
+// I wrote this class before i figured out there is an API for fetching that json file
 class JsonParser {
     fun loadJSONFromAsset(context: Context): LocationData {
         val assetManager = context.assets

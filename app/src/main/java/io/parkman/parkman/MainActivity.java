@@ -23,6 +23,7 @@ import com.google.android.gms.maps.model.PolygonOptions;
 import java.util.HashMap;
 import java.util.List;
 
+import Data.Data;
 import entities.Vehicles;
 import helper.StringToArray;
 
@@ -41,6 +42,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Data.getData();
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -124,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         // Marker
         for (int i = 0; i < mapViewModel.getZoneData().size(); i++){
             List<String> polygonLatLng;
-            polygonLatLng = StringToArray.convertStringToArraySpaceSeparated(mapViewModel.getZoneData().get(i).getPoint());
+            polygonLatLng = StringToArray.INSTANCE.convertStringToArraySpaceSeparated(mapViewModel.getZoneData().get(i).getPoint());
             zoneMap.put(mapViewModel.getZoneData().get(i).getName().trim(), mapViewModel.getZoneData().get(i));
             LatLng point = new LatLng(Double.parseDouble(polygonLatLng.get(0)), Double.parseDouble(polygonLatLng.get(1)));
             mMap.addMarker(new MarkerOptions()
