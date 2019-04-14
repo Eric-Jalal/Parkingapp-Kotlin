@@ -23,8 +23,7 @@ import com.google.android.gms.maps.model.PolygonOptions;
 import java.util.HashMap;
 import java.util.List;
 
-import entities.Bounds;
-import entities.Zones;
+import entities.Vehicles;
 import helper.StringToArray;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -158,10 +157,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void setMapBounds() {
         // Set bounds
-        Bounds boundsEntity = mapViewModel.getBounds();
+        Vehicles vehiclesEntity = mapViewModel.getBounds();
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
-        LatLng northEast = new LatLng(boundsEntity.getNorth(), boundsEntity.getEast());
-        LatLng southWest = new LatLng(boundsEntity.getSouth(),boundsEntity.getWest());
+        LatLng northEast = new LatLng(vehiclesEntity.getNorth(), vehiclesEntity.getEast());
+        LatLng southWest = new LatLng(vehiclesEntity.getSouth(), vehiclesEntity.getWest());
         builder.include(northEast);
         builder.include(southWest);
         LatLngBounds bounds = builder.build();

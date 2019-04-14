@@ -6,17 +6,11 @@ import java.util.List;
 
 public class LocationData {
 
-    @SerializedName("bounds")
-    private Bounds bounds;
-    @SerializedName("zones")
-    private List<Zones> zones;
+    @SerializedName("vehicles")
+    private List<Vehicles> vehicles;
 
-    public Bounds getBounds() {
-        return bounds;
-    }
-
-    public List<Zones> getZones() {
-        return zones;
+    public List<Vehicles> getVehicles() {
+        return vehicles;
     }
 
 }

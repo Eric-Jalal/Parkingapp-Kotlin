@@ -7,11 +7,10 @@ import com.google.android.gms.maps.model.LatLng;
 import java.util.ArrayList;
 import java.util.List;
 
-import entities.Bounds;
-import entities.Location;
-import entities.Zones;
+import entities.LocationData;
+import entities.Vehicles;
 import helper.StringToArray;
-import usecase.JsonParser;
+import helper.JsonParser;
 
 class MapViewModel {
 
@@ -24,7 +23,7 @@ class MapViewModel {
         this.context = context;
     }
 
-    private Location loadLocationGson(Context context){
+    private LocationData loadLocationGson(Context context){
        return jsonParser.loadJSONFromAsset(context);
     }
 
@@ -34,8 +33,8 @@ class MapViewModel {
         longitude = locLatLng.get(1);
     }
 
-    Bounds getBounds(){
-        return loadLocationGson(context).getLocationData().getBounds();
+    Vehicles getBounds(){
+        return loadLocationGson(context).getLocationData().getVehicles();
     }
 
     List<Zones> getZoneData() {

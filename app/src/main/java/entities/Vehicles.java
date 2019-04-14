@@ -2,7 +2,7 @@ package entities;
 
 import com.google.gson.annotations.SerializedName;
 
-public class Bounds {
+public class Vehicles {
 
     @SerializedName("north")
     private double north;
