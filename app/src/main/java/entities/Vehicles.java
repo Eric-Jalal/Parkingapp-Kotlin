@@ -4,28 +4,64 @@ import com.google.gson.annotations.SerializedName;
 
 public class Vehicles {
 
-    @SerializedName("north")
-    private double north;
-    @SerializedName("south")
-    private double south;
-    @SerializedName("west")
-    private double west;
-    @SerializedName("east")
-    private double east;
+    @SerializedName("id")
+    private int id; // this depends on the api, could be something else than integer
+    @SerializedName("name")
+    private String name;
+    @SerializedName("description")
+    private String description;
+    @SerializedName("latitude")
+    private double latitude;
+    @SerializedName("longitude")
+    private double longitude;
+    @SerializedName("batteryLevel")
+    private int batteryLevel;
+    @SerializedName("timestamp")
+    private String timestamp;
+    @SerializedName("price")
+    private int price;
+    @SerializedName("priceTime")
+    private int priceTime;
+    @SerializedName("currency")
+    private String currency;
 
-    public double getNorth() {
-        return north;
+    public int getId() {
+        return id;
     }
 
-    public double getSouth() {
-        return south;
+    public String getName() {
+        return name;
     }
 
-    public double getWest() {
-        return west;
+    public String getDescription() {
+        return description;
     }
 
-    public double getEast() {
-        return east;
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public int getBatteryLevel() {
+        return batteryLevel;
+    }
+
+    public String getTimestamp() {
+        return timestamp;
+    }
+
+    public int getPrice() {
+        return price;
+    }
+
+    public int getPriceTime() {
+        return priceTime;
+    }
+
+    public String getCurrency() {
+        return currency;
     }
 }

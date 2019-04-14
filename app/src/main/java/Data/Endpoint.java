@@ -8,5 +8,5 @@ import retrofit2.http.GET;
 
 public interface Endpoint {
     @GET("/vehicles/")
-    Call<List<Vehicles>> vehiclesList();
+    Call<List<Vehicles>> getVehiclesList();
 }
