@@ -19,7 +19,7 @@ internal class MapViewModel(context: Context) {
     val vehicles: ArrayList<Vehicles>
         get() {
             val listVehicles = ArrayList<Vehicles>()
-            for (i in 0..body!!.size) {
+            for (i in 0 until listVehicles.size) {
                 listVehicles.add(body!![i])
             }
             return listVehicles
